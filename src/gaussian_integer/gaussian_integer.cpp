@@ -1,4 +1,8 @@
+#ifdef _MODULES
 module gaussianInteger;
+#else
+#include "../../include/gaussian_integer/gaussian_integer.hpp"
+#endif
 
 GaussianInteger::GaussianInteger(): 
     real{0}, imag{0} {}

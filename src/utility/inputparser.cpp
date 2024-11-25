@@ -1,4 +1,8 @@
+#ifdef _MODULES
 module inputParser;
+#else
+#include "../../include/utility/inputparser.hpp"
+#endif
 
 bool isInteger(const std::string& s) {
     try {

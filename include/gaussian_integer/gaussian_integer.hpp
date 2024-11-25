@@ -1,6 +1,4 @@
-module;
-
-#if !defined(_MODULES_STD) && !defined(_MODULES_LIB)
+#pragma once
 #include <algorithm>
 #include <cctype>
 #include <climits>
@@ -10,30 +8,13 @@ module;
 #include <stdexcept>
 #include <string>
 #include <vector>
-#endif
 
-export module gaussianInteger;
+const std::regex REAL_REGEX{"([+-]?\\d+)$"};
+const std::regex IMAG_REGEX{"([+-]?)(\\d*)([ij]?)$"};
+const std::regex REAL_IMAG_REGEX{"([+-]?\\d+)([+-])(\\d*)([ij]?)$"};
+const std::regex IMAG_REAL_REGEX{"([+-]?)(\\d*)([ij])([+-]\\d+)$"};
 
-#if defined(_MODULES_STD)
-import std;
-#elif defined(_MODULES_LIB)
-import <algorithm>;
-import <cctype>;
-import <climits>;
-import <cmath>;
-import <iostream>;
-import <regex>;
-import <stdexcept>;
-import <string>;
-import <vector>;
-#endif
-
-export const std::regex REAL_REGEX{"([+-]?\\d+)$"};
-export const std::regex IMAG_REGEX{"([+-]?)(\\d*)([ij]?)$"};
-export const std::regex REAL_IMAG_REGEX{"([+-]?\\d+)([+-])(\\d*)([ij]?)$"};
-export const std::regex IMAG_REAL_REGEX{"([+-]?)(\\d*)([ij])([+-]\\d+)$"};
-
-export class GaussianInteger {
+class GaussianInteger {
     int real;
     int imag;
   public:
@@ -65,6 +46,6 @@ export class GaussianInteger {
     GaussianInteger findPrimeFactor() const;
 };
 
-export GaussianInteger fromString(const std::string& input);
-export long flooredSqrt(long n);
-export std::ostream& operator<<(std::ostream& out, const GaussianInteger& g);
+GaussianInteger fromString(const std::string& input);
+long flooredSqrt(long n);
+std::ostream& operator<<(std::ostream& out, const GaussianInteger& g);

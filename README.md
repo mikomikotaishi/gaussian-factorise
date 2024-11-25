@@ -1,6 +1,4 @@
-# Gaussian Integer Factoriser (C++20)
-
-This is a remake of the previous Gaussian Integer Factoriser program I created, using modules.
+# Gaussian Integer Factoriser (C++)
 
 ## Usage:
 ```gaussian-factorise```<br>
@@ -23,6 +21,3 @@ Also accepts `j` as the imaginary unit. `a + bi` and `bi + a` are both accepted 
     Output: `(7)`<br>
 ```./gaussian-factorise 425 - 470i```<br>
     Output: `(-1)(1 + 2i)(2 + i)(94 + 85i)`<br>
-
-## Make
-Because I know of no such way to use build systems with modules, the program must be built using the `make.sh` script.
