@@ -27,7 +27,7 @@ mkdir -p build
 cd build || exit 1
 if command -v clang++ &> /dev/null; then
     echo "Compiling using Clang:"
-    cmake -G Ninja -DCMAKE_CXX_COMPILER=clang++ DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++ -lc++abi" ..
+    cmake -G Ninja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++ -lc++abi" ..
 else
     echo "Compiling using GCC:"
     cmake -G Ninja -DCMAKE_CXX_COMPILER=g++ ..

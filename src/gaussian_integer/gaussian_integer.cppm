@@ -66,6 +66,7 @@ export class GaussianInteger {
     GaussianInteger findPrimeFactor() const;
 };
 
-export GaussianInteger fromString(const std::string& input);
-export long flooredSqrt(long n);
 export std::ostream& operator<<(std::ostream& out, const GaussianInteger& g);
+
+GaussianInteger fromString(const std::string& input);
+long flooredSqrt(long n);
