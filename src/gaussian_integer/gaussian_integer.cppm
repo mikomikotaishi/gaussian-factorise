@@ -68,5 +68,7 @@ export class GaussianInteger {
 
 export std::ostream& operator<<(std::ostream& out, const GaussianInteger& g);
 
-GaussianInteger fromString(const std::string& input);
-long flooredSqrt(long n);
+export namespace Manipulator {
+    GaussianInteger fromString(const std::string& input);
+    long flooredSqrt(long n);
+}

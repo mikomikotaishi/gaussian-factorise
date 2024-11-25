@@ -14,7 +14,7 @@ LDFLAGS = -fsanitize=address -lm -lpthread -ldl -lrt -lX11
 BUILD_DIR = bin
 OBJECTS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.o)
 DEPENDS = $(OBJECTS:.o=.d)
-EXEC = gaussian-factoriser
+EXEC = gaussian-factorise
 
 # ANSI color codes
 GREEN := $(shell echo -e "\033[32m")

@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
                     g = GaussianInteger(real, imag);
                 } else {
                     input.erase(std::remove_if(input.begin(), input.end(), ::isspace), input.end());
-                    g = fromString(input);
+                    g = Manipulator::fromString(input);
                 }
                 std::cout << "Gaussian integer: " << g << std::endl;
                 std::vector<GaussianInteger> factors = g.factorise();
@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
                 for (int i = 1; i < argc; ++i) 
                     input += argv[i];
                 input.erase(std::remove_if(input.begin(), input.end(), ::isspace), input.end());
-                GaussianInteger g = fromString(input);
+                GaussianInteger g = Manipulator::fromString(input);
                 std::cout << "Gaussian integer: " << g << std::endl;
                 std::vector<GaussianInteger> factors = g.factorise();
                 for (const GaussianInteger& factor: factors) 
