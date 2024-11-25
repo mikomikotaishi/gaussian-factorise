@@ -1,5 +1,11 @@
 # Gaussian Integer Factoriser (C++)
 
+## Build:
+This program requires C++23.
+
+To build with support for modules (requires Clang and `libc++`), use the `build.sh` script, which calls CMake.
+To build without using modules, just run `make`.
+
 ## Usage:
 ```gaussian-factorise```<br>
 ```gaussian-factorise <-h/-help/h/help>```<br>

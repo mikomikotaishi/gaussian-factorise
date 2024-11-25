@@ -1,92 +1,104 @@
-CXX = clang++
+CXX = g++
 SELF_DIR := $(shell pwd)
+DIRECTORIES = include src src/gaussian_integer src/utility
+INC = $(addprefix -I$(SELF_DIR)/,$(DIRECTORIES)) -I$(SELF_DIR)/.
 
-# Directories containing source code
-SRC_DIRECTORIES = src src/gaussian_integer src/utility
-INC_DIRECTORIES = include include/gaussian_integer include/utility
-
-# Include paths for project headers
-INC = $(addprefix -I$(SELF_DIR)/include/,$(INC_DIRECTORIES)) $(addprefix -I$(SELF_DIR)/,$(INC_DIRECTORIES)) -I$(SELF_DIR)/.
-
-# List of source files
-SOURCES = $(wildcard $(addsuffix /*.cpp,$(SRC_DIRECTORIES))) $(wildcard *.cpp)
-MODULES = $(wildcard $(addsuffix /*.cppm,$(SRC_DIRECTORIES))) $(wildcard *.cppm)
-MODULE_PCMS = $(patsubst %.cppm,$(BUILD_DIR)/%.pcm,${MODULES})
-
-# System includes
-SYSTEM_INCLUDES = -I/usr/include/c++/14.2.1 \
-                 -I/usr/include
-
-# Common flags
-COMMON_FLAGS = -Wall \
-               -g \
-               -O2 \
-               -Werror=vla \
-               ${INC} \
-               ${SYSTEM_INCLUDES} \
-               -std=c++23 \
-               -stdlib=libstdc++
+# Find all source files
+SOURCES = $(shell find src -name "*.cpp") # This will recursively find all .cpp files in src directory
+HEADERS = $(shell find src -name "*.h") $(shell find src -name "*.hpp")
 
 # Debug flags
-CXXFLAGS = ${COMMON_FLAGS} \
-           -D_MODULES \
-           -DDEBUG \
-           -fsanitize=address \
-           -fmodules \
-           -fimplicit-modules \
-           -fmodules-cache-path=$(BUILD_DIR)/modules_cache \
-           -fprebuilt-module-path=$(BUILD_DIR)/modules_cache
-
-# Linking flags
-LDFLAGS = -fsanitize=address \
-          -lm -lpthread -ldl -lrt -lX11
+CXXFLAGS = -std=c++23 -DDEBUG -fsanitize=address -I/usr/include -Wall -g -MMD -O2 -Werror=vla ${INC}
+LDFLAGS = -fsanitize=address -lm -lpthread -ldl -lrt -lX11
 
 BUILD_DIR = bin
-OBJECTS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, ${SOURCES})
-MODULE_OBJECTS = $(patsubst %.cppm, $(BUILD_DIR)/%.o, ${MODULES})
+OBJECTS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.o)
 DEPENDS = $(OBJECTS:.o=.d)
-EXEC = gaussian-factorise
+EXEC = gaussian-integer
 
-# Create necessary directories
-$(shell mkdir -p $(BUILD_DIR))
-$(shell mkdir -p $(BUILD_DIR)/src)
-$(shell mkdir -p $(BUILD_DIR)/src/gaussian_integer)
-$(shell mkdir -p $(BUILD_DIR)/src/utility)
-$(shell mkdir -p $(BUILD_DIR)/modules_cache)
+# ANSI color codes
+GREEN := $(shell echo -e "\033[32m")
+RESET := $(shell echo -e "\033[0m")
+
+# Progress bar variables
+TOTAL_FILES := $(words $(SOURCES))
+CURRENT_FILE = 0
+BAR_LENGTH = 50
+
+# Store start time in nanoseconds
+START_TIME := $(shell date +%s.%N)
+
+# Function to calculate elapsed time in seconds and milliseconds
+define calc_elapsed
+$(shell echo "$(shell date +%s.%N) - $(START_TIME)" | bc)
+endef
+
+# Function to format time with milliseconds
+define format_time
+$(shell echo "$1" | awk '{mins=int($$1/60); secs=int($$1%60); ms=int(($$1*1000)%1000); printf "%02d:%02d.%03d", mins, secs, ms}')
+endef
+
+# Function to draw progress bar and compilation status
+define draw_progress_bar
+	$(eval CURRENT_FILE=$(shell echo $$(($(CURRENT_FILE) + 1))))
+	$(eval PROGRESS=$(shell echo "scale=2; $(CURRENT_FILE) * 100 / $(TOTAL_FILES)" | bc))
+	$(eval FILLED=$(shell echo "scale=0; $(PROGRESS) * $(BAR_LENGTH) / 100" | bc))
+	$(eval EMPTY=$(shell echo "$(BAR_LENGTH) - $(FILLED)" | bc))
+	$(eval ELAPSED=$(call calc_elapsed))
+	$(eval TIME_STR=$(call format_time,$(ELAPSED)))
+	@echo '$(GREEN)Compiling$(RESET) $<'
+	@if [ $(CURRENT_FILE) -lt $(TOTAL_FILES) ]; then \
+		printf '[%-*s%*s] %3.1f%% (%d/%d files) [%s]\n' \
+			'$(FILLED)' \
+			'$(shell printf '%*s' '$(FILLED)' | tr " " "#")' \
+			'$(EMPTY)' \
+			'' \
+			'$(PROGRESS)' \
+			'$(CURRENT_FILE)' \
+			'$(TOTAL_FILES)' \
+			'$(TIME_STR)'; \
+	else \
+		printf '[%*s] 100.0%% (%d/%d files) [%s]\n' \
+			'$(BAR_LENGTH)' \
+			'$(shell printf '%*s' '$(BAR_LENGTH)' | tr " " "#")' \
+			'$(TOTAL_FILES)' \
+			'$(TOTAL_FILES)' \
+			'$(TIME_STR)'; \
+	fi
+endef
+
+# Create build directories
+$(shell mkdir -p $(sort $(dir $(OBJECTS))))
+
+# Default target
+all: ${EXEC}
 
 # Target to build the executable
-${EXEC}: ${MODULE_OBJECTS} ${OBJECTS}
-	${CXX} ${CXXFLAGS} ${MODULE_OBJECTS} ${OBJECTS} -o ${EXEC} $(LDFLAGS)
+${EXEC}: ${OBJECTS}
+	@echo -e "\n$(GREEN)Linking$(RESET) executable..."
+	@${CXX} ${OBJECTS} -o ${EXEC} ${LDFLAGS}
+	@echo -e "\n$(GREEN)Build complete:$(RESET) ${EXEC} [Total time: $(call format_time,$(call calc_elapsed))]"
 
-# Function to get module name from file path
-module_name = $(shell basename $(1) .cppm | tr '[:upper:]' '[:lower:]')
-
-# Rule to compile module PCM files
-$(BUILD_DIR)/%.pcm: %.cppm
+# Rule to build object files from source
+$(BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	${CXX} ${COMMON_FLAGS} -fmodules -x c++-module --precompile $< -o $@
+	@$(call draw_progress_bar)
+	@${CXX} ${CXXFLAGS} -c $< -o $@
 
-# Rule to compile .cppm (module interface) files
-$(BUILD_DIR)/%.o: %.cppm $(BUILD_DIR)/%.pcm
-	@mkdir -p $(dir $@)
-	${CXX} ${CXXFLAGS} -c $< -o $@
-
-# Rule to build object files from source (.cpp files)
-$(BUILD_DIR)/%.o: %.cpp ${MODULE_PCMS}
-	@mkdir -p $(dir $@)
-	${CXX} ${CXXFLAGS} $(foreach pcm,${MODULE_PCMS},-fmodule-file=$(call module_name,$(patsubst $(BUILD_DIR)/%.pcm,%.cppm,$(pcm)))=$(pcm)) -c $< -o $@
-
-# Print module information for debugging
-.PHONY: print-modules
-print-modules:
-	@echo "Module PCMs: ${MODULE_PCMS}"
-	@echo "Module Objects: ${MODULE_OBJECTS}"
+# Print sources for debugging
+print-sources:
+	@echo "Sources found: "
+	@echo "${SOURCES}"
+	@echo "Objects to build: "
+	@echo "${OBJECTS}"
 
 # Include dependency files
 -include $(DEPENDS)
 
-.PHONY: clean
+.PHONY: clean print-sources all
 
 # Clean the build directory and executable
 clean:
-	rm -rf $(BUILD_DIR) ${EXEC}
+	@echo "$(GREEN)Cleaning$(RESET) build files..."
+	@rm -rf $(BUILD_DIR) ${EXEC}
+	@echo "Clean complete"
