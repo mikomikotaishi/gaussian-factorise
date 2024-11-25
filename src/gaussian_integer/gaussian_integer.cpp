@@ -9,12 +9,12 @@ GaussianInteger::GaussianInteger():
 
 GaussianInteger::GaussianInteger(int real, int imag): 
     real{real}, imag{imag} {
-    if (real == INT_MIN || real == INT_MAX || imag == INT_MIN || imag == INT_MAX)
+    if (real == std::numeric_limits<int>::min() || real == std::numeric_limits<int>::max() || imag == std::numeric_limits<int>::min() || imag == std::numeric_limits<int>::max())
         throw std::overflow_error("GaussianInteger overflow");
 }
 
 GaussianInteger::GaussianInteger(long real, long imag) {
-    if (real <= INT_MIN || real >= INT_MAX || imag <= INT_MIN || imag >= INT_MAX)
+    if (real <= std::numeric_limits<int>::min() || real >= std::numeric_limits<int>::max() || imag <= std::numeric_limits<int>::min() || imag >= std::numeric_limits<int>::max())
         throw std::overflow_error("GaussianInteger overflow");
     else {
         this->real = static_cast<int>(real);
@@ -28,14 +28,14 @@ int GaussianInteger::getReal() const { return real; }
 int GaussianInteger::getImag() const { return imag; }
 
 void GaussianInteger::setReal(int real) { 
-    if (real == INT_MIN || real == INT_MAX)
+    if (real == std::numeric_limits<int>::min() || real == std::numeric_limits<int>::max())
         throw std::overflow_error("GaussianInteger overflow");
     else
         this->real = real; 
 }
 
 void GaussianInteger::setImag(int imag) { 
-    if (imag == INT_MIN || imag == INT_MAX)
+    if (imag == std::numeric_limits<int>::min() || imag == std::numeric_limits<int>::max())
         throw std::overflow_error("GaussianInteger overflow");
     else
         this->imag = imag; 
@@ -103,10 +103,10 @@ std::ostream& operator<<(std::ostream& os, const GaussianInteger& g) {
 
 // Methods
 std::string GaussianInteger::toString() const {
-    std::string real_str = std::to_string(real);
-    std::string imag_str = std::to_string(imag);
+    std::string realStr = std::to_string(real);
+    std::string imagStr = std::to_string(imag);
     if (imag == 0) 
-        return real_str;
+        return realStr;
     else if (real == 0) {
         switch (imag) {
             case 1:
@@ -114,16 +114,16 @@ std::string GaussianInteger::toString() const {
             case -1:
                 return "-i";
             default:
-                return imag_str + "i";
+                return imagStr + "i";
         }
     } else if (imag == 1) 
-        return real_str + " + i";
+        return realStr + " + i";
     else if (imag == -1) 
-        return real_str + " - i";
+        return realStr + " - i";
     else if (imag > 0) 
-        return real_str + " + " + imag_str + "i";
+        return realStr + " + " + imagStr + "i";
     else 
-        return real_str + " - " + std::to_string(-imag) + "i";
+        return realStr + " - " + std::to_string(-imag) + "i";
 }
 
 GaussianInteger GaussianInteger::conjugate() const { return GaussianInteger(real, -imag); }
@@ -148,7 +148,7 @@ GaussianInteger GaussianInteger::findPrimeFactor() const {
                     for (long realResult = flooredSqrt(i); realResult > 0; --realResult) {
                         long imagResult = flooredSqrt(i - realResult * realResult);
                         if (realResult * realResult + imagResult * imagResult == i) {
-                            if (realResult > INT_MAX || imagResult > INT_MAX) 
+                            if (realResult > std::numeric_limits<int>::max() || imagResult > std::numeric_limits<int>::max()) 
                                 throw std::overflow_error("GaussianInteger overflow");
                             else if (isDivisibleBy(*this, GaussianInteger(static_cast<int>(realResult), static_cast<int>(imagResult)))) 
                                 return GaussianInteger(static_cast<int>(realResult), static_cast<int>(imagResult));
@@ -200,24 +200,24 @@ long flooredSqrt(long n) {
 
 GaussianInteger fromString(const std::string& input) {
     // Parse a string into a GaussianInteger
-    long real_comp;
-    long imag_comp;
+    long realComp;
+    long imagComp;
     std::smatch match;
     if (std::regex_match(input, match, REAL_REGEX)) {
-        real_comp = std::stoi(match[1]);
-        imag_comp = 0;
+        realComp = std::stoi(match[1]);
+        imagComp = 0;
     } else if (std::regex_match(input, match, IMAG_REGEX)) {
-        real_comp = 0;
-        imag_comp = (match[1] == "-" ? -1 : 1) * (match[2].str().empty() ? 1 : std::stoi(match[2]));
+        realComp = 0;
+        imagComp = (match[1] == "-" ? -1 : 1) * (match[2].str().empty() ? 1 : std::stoi(match[2]));
     } else if (std::regex_match(input, match, REAL_IMAG_REGEX)) {
-        real_comp = std::stoi(match[1]);
-        imag_comp = (match[2] == "-" ? -1 : 1) * (match[3].str().empty() ? 1 : std::stoi(match[3]));
+        realComp = std::stoi(match[1]);
+        imagComp = (match[2] == "-" ? -1 : 1) * (match[3].str().empty() ? 1 : std::stoi(match[3]));
     } else if (std::regex_match(input, match, IMAG_REAL_REGEX)) {
-        real_comp = std::stoi(match[4]);
-        imag_comp = (match[1] == "-" ? -1 : 1) * (match[2].str().empty() ? 1 : std::stoi(match[2]));
+        realComp = std::stoi(match[4]);
+        imagComp = (match[1] == "-" ? -1 : 1) * (match[2].str().empty() ? 1 : std::stoi(match[2]));
     } else throw std::invalid_argument("Invalid input: " + input);
-    if
-        (real_comp <= INT_MIN || real_comp >= INT_MAX || imag_comp <= INT_MIN || imag_comp >= INT_MAX) throw std::overflow_error("GaussianInteger overflow");
+    if (realComp <= std::numeric_limits<int>::min() || realComp >= std::numeric_limits<int>::max() || imagComp <= std::numeric_limits<int>::min() || imagComp >= std::numeric_limits<int>::max()) 
+        throw std::overflow_error("GaussianInteger overflow");
     else 
-        return GaussianInteger(real_comp, imag_comp);
+        return GaussianInteger(realComp, imagComp);
 }

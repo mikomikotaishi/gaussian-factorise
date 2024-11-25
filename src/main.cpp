@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
                 std::vector<GaussianInteger> factors = g.factorise();
                 for (const GaussianInteger& factor: factors) 
                     std::cout << ("(" + factor.toString() + ")");
-                std::cout << std::endl;
+                std::print("\n");
             }
         } else {
             InputParser ip(argc, argv, validOptions);
@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
                 std::vector<GaussianInteger> factors = g.factorise();
                 for (const GaussianInteger& factor: factors) 
                     std::cout << ("(" + factor.toString() + ")");
-                std::cout << std::endl;
+                std::print("\n");
             } else {
                 std::string input = "";
                 for (int i = 1; i < argc; ++i) 
@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
                 std::vector<GaussianInteger> factors = g.factorise();
                 for (const GaussianInteger& factor: factors) 
                     std::cout << ("(" + factor.toString() + ")");
-                std::cout << std::endl;
+                std::print("\n");
             }
         }
     } catch (std::invalid_argument& e) {

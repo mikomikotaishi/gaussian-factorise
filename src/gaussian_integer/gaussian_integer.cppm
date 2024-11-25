@@ -3,9 +3,9 @@ module;
 #if !defined(_MODULES_STD) && !defined(_MODULES_LIB)
 #include <algorithm>
 #include <cctype>
-#include <climits>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <regex>
 #include <stdexcept>
 #include <string>
@@ -21,6 +21,7 @@ import <algorithm>;
 import <cctype>;
 import <climits>;
 import <cmath>;
+import <limits>;
 import <iostream>;
 import <regex>;
 import <stdexcept>;
